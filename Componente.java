@@ -10,7 +10,7 @@ public class Componente extends Thread
 {
     String nome; // diz se eh processador disco ou teclado
     String mensagem; // armazena a mensagem que vai ser impressa, a mensagem muda com base no nome
-    int intervalo; // intervalo de tempo em segundos que o componente fica parado apos executar uma acao
+    int intervalo; // intervalo de tempo em centesimos de segundos que o componente fica parado apos executar uma acao
     String[] dados = new String[100]; // vetor de dados que o processador acessa
     Componente processador; // componente utilizado pelo disco para receber sinais de execucao
 
@@ -120,7 +120,7 @@ public class Componente extends Thread
         System.out.println(""); 
         System.out.println(nome.toUpperCase()+ ": "); // imprime o nome do componente
         System.out.println (mensagem); // imprime a mensagem do componente
-        Thread.sleep(intervalo*100); // aguarda o numero de segundos especificado em intervalo para executar novamente
+        Thread.sleep(intervalo*100); // aguarda o numero de centesimos segundos especificado em intervalo para executar novamente
     }
 
     

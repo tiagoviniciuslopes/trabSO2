@@ -5,16 +5,18 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+// Esta classe contem os comportamentos de disco, teclado e processador, o modo assumido deve ser especificado no construtor da classe
 public class Componente extends Thread
 {
-    String nome;
-    String mensagem;
-    int intervalo;
-    String[] dados = new String[100];
-    boolean semaforo = false;
-    Componente processador;
+    String nome; // diz se eh processador disco ou teclado
+    String mensagem; // armazena a mensagem que vai ser impressa, a mensagem muda com base no nome
+    int intervalo; // intervalo de tempo em segundos que o componente fica parado apos executar uma acao
+    String[] dados = new String[100]; // vetor de dados que o processador acessa
+    Componente processador; // componente utilizado pelo disco para receber sinais de execucao
 
-    public Componente(String nome) throws Exception
+    //construtor da classe, aqui passamos o nome do componente e com base nisso sao adicionados mensagem e intervalo
+    //caso for um processador o vetor de dados eh inicializado tambem
+    public Componente(String nome) throws Exception 
     {
         this.nome = nome;
 
@@ -23,7 +25,7 @@ public class Componente extends Thread
             this.mensagem = "executei uma instrucao";
             this.intervalo = 1;
 
-           for(int i = 0; i<100 ; ++i)
+           for(int i = 0; i<100 ; ++i) // inicializando vetor de dados
            {
                dados[i] = "dado " + Integer.toString(i);
            }
@@ -41,16 +43,17 @@ public class Componente extends Thread
 
     }
 
+    //metodo que vai executar quando iniciarmos a thread
     public void run() 
     { 
 
-        if(this.nome.equals("disco"))
+        if(this.nome.equals("disco")) // caso for um disco eh feito o link com o processador que vai sinalizar quando o disco deve executar 
         {
-            synchronized(processador)
+            synchronized(processador) // o processador deve estar settado no disco
             {
                 try
                 {
-                    processador.wait();
+                    processador.wait(); // o disco aguarda o processador enviar um notify para continuar a execucao
                 }
                 catch(Exception e)
                 {
@@ -65,7 +68,7 @@ public class Componente extends Thread
         {
             try 
             { 
-                if(this.nome.equals("processador"))
+                if(this.nome.equals("processador")) // o processador executa a acao comum e le um dado da memoria
                 {
                     acaoComum();
 
@@ -76,17 +79,17 @@ public class Componente extends Thread
 
                         synchronized(this)
                         {
-                            if( contador % 10 == 0) notifyAll();
+                            if( contador % 10 == 0) notifyAll(); // caso o dado na memoria for divisivel por 10 o processador nitifica o disco que passa a executar
                         }
                     }
 
                 }
-                else if(this.nome.equals("teclado"))
+                else if(this.nome.equals("teclado")) // o teclado executa a acao comum quando uma tecla eh pressionada
                 {
-                    scanner.nextLine();
+                    scanner.nextLine(); // metodo getchar() do java
                     acaoComum();
                 }
-                else
+                else // o disco executa a acao comum, grava um valor aleatorio em um arquivo txt e volta a modo de espera, aguardando o processador
                 {
                     acaoComum();
 
@@ -99,7 +102,7 @@ public class Componente extends Thread
                     
                     synchronized(processador)
                     {
-                        processador.wait();
+                        processador.wait(); // aqui o disco volta ao estado wait aguardando o processador
                     }
 
                 }
@@ -111,12 +114,13 @@ public class Componente extends Thread
         }
     } 
 
-    public void acaoComum() throws Exception
+    //acao que todos os componentes executam
+    public void acaoComum() throws Exception 
     {
-        System.out.println("");
-        System.out.println(nome.toUpperCase()+ ": ");
-        System.out.println (mensagem);
-        Thread.sleep(intervalo*100);
+        System.out.println(""); 
+        System.out.println(nome.toUpperCase()+ ": "); // imprime o nome do componente
+        System.out.println (mensagem); // imprime a mensagem do componente
+        Thread.sleep(intervalo*100); // aguarda o numero de segundos especificado em intervalo para executar novamente
     }
 
     

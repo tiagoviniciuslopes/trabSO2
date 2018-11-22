@@ -11,8 +11,10 @@ public class Componente extends Thread
     String mensagem;
     int intervalo;
     String[] dados = new String[100];
+    boolean semaforo = false;
+    Componente processador;
 
-    public Componente(String nome)
+    public Componente(String nome) throws Exception
     {
         this.nome = nome;
 
@@ -41,6 +43,22 @@ public class Componente extends Thread
 
     public void run() 
     { 
+
+        if(this.nome.equals("disco"))
+        {
+            synchronized(processador)
+            {
+                try
+                {
+                    processador.wait();
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         Scanner scanner = new Scanner(System.in);
         int contador = 0;
         while(true)
@@ -51,9 +69,17 @@ public class Componente extends Thread
                 {
                     acaoComum();
 
-                    if(contador >= 100) contador = 0;
-                    System.out.println("dado lido da memoria: " + dados[contador]);
-                    ++contador;
+                    if(contador < 100)
+                    {
+                        System.out.println("dado lido da memoria: " + dados[contador]);
+                        ++contador;
+
+                        synchronized(this)
+                        {
+                            if( contador % 10 == 0) notifyAll();
+                        }
+                    }
+
                 }
                 else if(this.nome.equals("teclado"))
                 {
@@ -70,6 +96,12 @@ public class Componente extends Thread
                     BufferedWriter writer = new BufferedWriter( new FileWriter( "random.txt"));
                     writer.write(Integer.toString(n));
                     writer.close();
+                    
+                    synchronized(processador)
+                    {
+                        processador.wait();
+                    }
+
                 }
             } 
             catch (Exception e) 
@@ -86,4 +118,6 @@ public class Componente extends Thread
         System.out.println (mensagem);
         Thread.sleep(intervalo*100);
     }
+
+    
 }
